@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile - Banking System</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="navbar-container">
+        <a href="/dashboard" class="navbar-brand">🏦 BankApp</a>
+        <ul class="navbar-menu">
+          <li><a href="/dashboard">Dashboard</a></li>
+          <li><a href="/transfer">Transfer</a></li>
+          <li><a href="/transactions">Transactions</a></li>
+          <li><a href="/beneficiaries">Beneficiaries</a></li>
+          <li><a href="/goals">Goals</a></li>
+          <li><a href="/profile">Profile</a></li>
+        </ul>
+        <div class="navbar-actions">
+          <button class="btn btn-danger btn-sm" onclick="logout()">
+            Logout
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+      <h2 style="margin: 2rem 0">My Profile</h2>
+
+      <div id="alertContainer"></div>
+
+      <!-- Profile Information -->
+      <div class="card">
+        <div class="card-header">Personal Information</div>
+        <div id="profileInfo" class="loading">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+      <!-- Update Profile -->
+      <div class="card">
+        <div class="card-header">Update Profile</div>
+        <form id="updateProfileForm">
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" class="form-control" />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" class="form-control" />
+          </div>
+
+          <button type="submit" class="btn btn-primary">Update Profile</button>
+        </form>
+      </div>
+
+      <!-- Change Password -->
+      <div class="card">
+        <div class="card-header">Change Password</div>
+        <form id="changePasswordForm">
+          <div class="form-group">
+            <label for="current_password">Current Password</label>
+            <input
+              type="password"
+              id="current_password"
+              class="form-control"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="new_password">New Password</label>
+            <input
+              type="password"
+              id="new_password"
+              class="form-control"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="confirm_new_password">Confirm New Password</label>
+            <input
+              type="password"
+              id="confirm_new_password"
+              class="form-control"
+              required
+            />
+          </div>
+
+          <button type="submit" class="btn btn-secondary">
+            Change Password
+          </button>
+        </form>
+      </div>
+
+      <!-- Delete Account -->
+      <div class="card">
+        <div class="card-header" style="color: var(--danger-color)">
+          Danger Zone
+        </div>
+        <p style="color: var(--text-light)">
+          Once you delete your account, there is no going back. Please be
+          certain.
+        </p>
+        <button class="btn btn-danger" onclick="deleteAccount()">
+          Delete Account
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:3005";
+
+      const checkAuth = () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          window.location.href = "/login";
+          return null;
+        }
+        return token;
+      };
+
+      const logout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/login.html";
+      };
+
+      const showAlert = (message, type = "error") => {
+        const alertContainer = document.getElementById("alertContainer");
+        alertContainer.innerHTML = `
+        <div class="alert alert-${type}">
+          ${message}
+        </div>
+      `;
+        setTimeout(() => {
+          alertContainer.innerHTML = "";
+        }, 5000);
+      };
+
+      const loadProfile = async () => {
+        const token = checkAuth();
+        if (!token) return;
+
+        try {
+          const response = await fetch(`${API_URL}/user/profile`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const data = await response.json();
+
+          if (data.success) {
+            const user = data.data;
+            document.getElementById("profileInfo").innerHTML = `
+        <div class="grid grid-2">
+          <div>
+            <p><strong>Full Name:</strong> ${user.name}</p>
+            <p><strong>Email:</strong> ${user.email}</p>
+            <p><strong>User ID:</strong> ${user.id}</p>
+          </div>
+        </div>
+      `;
+
+            // Pre-fill form
+            document.getElementById("name").value = user.name;
+            document.getElementById("email").value = user.email;
+          }
+        } catch (error) {
+          console.error("Error loading profile:", error);
+        }
+      };
+
+      document
+        .getElementById("updateProfileForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const token = checkAuth();
+
+          const formData = {
+            name: document.getElementById("name").value,
+            email: document.getElementById("email").value,
+          };
+
+          try {
+            const response = await fetch(`${API_URL}/user/profile`, {
+              method: "PUT",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(formData),
+            });
+            const data = await response.json();
+
+            if (data.success) {
+              showAlert("Profile updated successfully!", "success");
+              loadProfile();
+            } else {
+              showAlert(data.message || "Update failed");
+            }
+          } catch (error) {
+            showAlert("An error occurred");
+          }
+        });
+
+      document
+        .getElementById("changePasswordForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const token = checkAuth();
+
+          const current_password =
+            document.getElementById("current_password").value;
+          const new_password = document.getElementById("new_password").value;
+          const confirm_new_password = document.getElementById(
+            "confirm_new_password"
+          ).value;
+
+          if (new_password !== confirm_new_password) {
+            showAlert("New passwords do not match");
+            return;
+          }
+
+          if (new_password.length < 8) {
+            showAlert("Password must be at least 8 characters");
+            return;
+          }
+
+          try {
+            const response = await fetch(`${API_URL}/user/change-password`, {
+              method: "PUT",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ current_password, new_password }),
+            });
+            const data = await response.json();
+
+            if (data.success) {
+              showAlert("Password changed successfully!", "success");
+              document.getElementById("changePasswordForm").reset();
+            } else {
+              showAlert(data.message || "Password change failed");
+            }
+          } catch (error) {
+            showAlert("An error occurred");
+          }
+        });
+
+      const deleteAccount = async () => {
+        const password = prompt(
+          "Enter your password to confirm account deletion:"
+        );
+        if (!password) return;
+
+        if (
+          !confirm("Are you absolutely sure? This action cannot be undone.")
+        ) {
+          return;
+        }
+
+        const token = checkAuth();
+
+        try {
+          const response = await fetch(`${API_URL}/account/delete`, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ password }),
+          });
+          const data = await response.json();
+
+          if (data.success) {
+            alert("Account deleted successfully");
+            logout();
+          } else {
+            alert(data.message || "Deletion failed");
+          }
+        } catch (error) {
+          alert("An error occurred");
+        }
+      };
+
+      window.onload = loadProfile;
+    </script>
+  </body>
+</html>
