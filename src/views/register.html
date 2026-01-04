@@ -8,10 +8,12 @@
   </head>
   <body>
     <div class="auth-container">
-      <div class="auth-card" style="max-width: 600px">
+      <div class="auth-card" style="max-width: 650px">
         <div class="auth-header">
           <h1>🏦 Create Account</h1>
-          <p style="color: var(--text-light)">Start your banking journey</p>
+          <p style="color: var(--text-light); font-size: 1.05rem">
+            Start your banking journey with us
+          </p>
         </div>
 
         <div id="alertContainer"></div>
@@ -30,7 +32,7 @@
             </div>
 
             <div class="form-group">
-              <label for="email">Email</label>
+              <label for="email">Email Address</label>
               <input
                 type="email"
                 id="email"
@@ -43,7 +45,7 @@
 
           <div class="grid grid-2">
             <div class="form-group">
-              <label for="phone">Phone</label>
+              <label for="phone">Phone Number</label>
               <input
                 type="tel"
                 id="phone"
@@ -65,7 +67,7 @@
           </div>
 
           <div class="form-group">
-            <label for="address">Address</label>
+            <label for="address">Complete Address</label>
             <textarea
               id="address"
               class="form-control"
@@ -102,7 +104,7 @@
           <button
             type="submit"
             class="btn btn-primary"
-            style="width: 100%"
+            style="width: 100%; margin-top: 1rem"
             id="registerBtn"
           >
             Create Account
@@ -145,6 +147,11 @@
             return;
           }
 
+          if (password.length < 8) {
+            showAlert("Password must be at least 8 characters long");
+            return;
+          }
+
           registerBtn.disabled = true;
           registerBtn.textContent = "Creating Account...";
 
@@ -152,7 +159,7 @@
             email: document.getElementById("email").value,
             password: password,
             phone: document.getElementById("phone").value,
-            full_name: document.getElementById("full_name").value,
+            name: document.getElementById("full_name").value,
             date_of_birth: document.getElementById("date_of_birth").value,
             address: document.getElementById("address").value,
           };
@@ -175,7 +182,7 @@
               );
               setTimeout(() => {
                 window.location.href = "/login.html";
-              }, 1000);
+              }, 1500);
             } else {
               showAlert(
                 data.message || data.errors?.join(", ") || "Registration failed"

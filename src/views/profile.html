@@ -10,14 +10,12 @@
     <!-- Navbar -->
     <nav class="navbar">
       <div class="navbar-container">
-        <a href="/dashboard" class="navbar-brand">🏦 BankApp</a>
+        <a href="/dashboard.html" class="navbar-brand">🏦 BankApp</a>
         <ul class="navbar-menu">
-          <li><a href="/dashboard">Dashboard</a></li>
-          <li><a href="/transfer">Transfer</a></li>
-          <li><a href="/transactions">Transactions</a></li>
-          <li><a href="/beneficiaries">Beneficiaries</a></li>
-          <li><a href="/goals">Goals</a></li>
-          <li><a href="/profile">Profile</a></li>
+          <li><a href="/dashboard.html">Dashboard</a></li>
+          <li><a href="/transfer.html">Transfer</a></li>
+          <li><a href="/transactions.html">Transactions</a></li>
+          <li><a href="/profile.html">Profile</a></li>
         </ul>
         <div class="navbar-actions">
           <button class="btn btn-danger btn-sm" onclick="logout()">
@@ -28,7 +26,9 @@
     </nav>
 
     <div class="container">
-      <h2 style="margin: 2rem 0">My Profile</h2>
+      <h2 style="margin: 2rem 0; font-size: 2rem; font-weight: 700">
+        My Profile
+      </h2>
 
       <div id="alertContainer"></div>
 
@@ -42,16 +42,18 @@
 
       <!-- Update Profile -->
       <div class="card">
-        <div class="card-header">Update Profile</div>
+        <div class="card-header">Update KYC</div>
         <form id="updateProfileForm">
-          <div class="form-group">
-            <label for="name">Full Name</label>
-            <input type="text" id="name" class="form-control" />
-          </div>
+          <div class="grid grid-2">
+            <div class="form-group">
+              <label for="name">Full Name</label>
+              <input type="text" id="name" class="form-control" required />
+            </div>
 
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" class="form-control" />
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <input type="email" id="email" class="form-control" required />
+            </div>
           </div>
 
           <button type="submit" class="btn btn-primary">Update Profile</button>
@@ -60,26 +62,29 @@
 
       <!-- Change Password -->
       <div class="card">
-        <div class="card-header">Change Password</div>
+        <div class="card-header">Change Pin</div>
         <form id="changePasswordForm">
-          <div class="form-group">
-            <label for="current_password">Current Password</label>
-            <input
-              type="password"
-              id="current_password"
-              class="form-control"
-              required
-            />
-          </div>
+          <div class="grid grid-2">
+            <div class="form-group">
+              <label for="current_password">Current Password</label>
+              <input
+                type="password"
+                id="current_password"
+                class="form-control"
+                required
+              />
+            </div>
 
-          <div class="form-group">
-            <label for="new_password">New Password</label>
-            <input
-              type="password"
-              id="new_password"
-              class="form-control"
-              required
-            />
+            <div class="form-group">
+              <label for="new_password">New Password</label>
+              <input
+                type="password"
+                id="new_password"
+                class="form-control"
+                placeholder="Minimum 8 characters"
+                required
+              />
+            </div>
           </div>
 
           <div class="form-group">
@@ -88,6 +93,7 @@
               type="password"
               id="confirm_new_password"
               class="form-control"
+              placeholder="Re-enter new password"
               required
             />
           </div>
@@ -99,16 +105,16 @@
       </div>
 
       <!-- Delete Account -->
-      <div class="card">
+      <div class="card" style="border-left: 4px solid var(--danger-color)">
         <div class="card-header" style="color: var(--danger-color)">
-          Danger Zone
+          ⚠️ Danger Zone
         </div>
-        <p style="color: var(--text-light)">
+        <p style="color: var(--text-light); margin-bottom: 1.5rem">
           Once you delete your account, there is no going back. Please be
-          certain.
+          certain. All your data will be permanently removed.
         </p>
         <button class="btn btn-danger" onclick="deleteAccount()">
-          Delete Account
+          Delete My Account
         </button>
       </div>
     </div>
@@ -138,6 +144,7 @@
           ${message}
         </div>
       `;
+        window.scrollTo({ top: 0, behavior: "smooth" });
         setTimeout(() => {
           alertContainer.innerHTML = "";
         }, 5000);
@@ -158,14 +165,31 @@
           if (data.success) {
             const user = data.data;
             document.getElementById("profileInfo").innerHTML = `
-        <div class="grid grid-2">
-          <div>
-            <p><strong>Full Name:</strong> ${user.name}</p>
-            <p><strong>Email:</strong> ${user.email}</p>
-            <p><strong>User ID:</strong> ${user.id}</p>
-          </div>
-        </div>
-      `;
+              <div class="profile-info-grid">
+                <div class="profile-info-item">
+                  <div class="profile-info-label">Full Name</div>
+                  <div class="profile-info-value">${user.name}</div>
+                </div>
+                <div class="profile-info-item">
+                  <div class="profile-info-label">Email Address</div>
+                  <div class="profile-info-value">${user.email}</div>
+                </div>
+                <div class="profile-info-item">
+                  <div class="profile-info-label">User ID</div>
+                  <div class="profile-info-value">${user.id}</div>
+                </div>
+                <div class="profile-info-item">
+                  <div class="profile-info-label">Member Since</div>
+                  <div class="profile-info-value">${new Date(
+                    user.createdAt || Date.now()
+                  ).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}</div>
+                </div>
+              </div>
+            `;
 
             // Pre-fill form
             document.getElementById("name").value = user.name;
@@ -173,6 +197,8 @@
           }
         } catch (error) {
           console.error("Error loading profile:", error);
+          document.getElementById("profileInfo").innerHTML =
+            '<p style="color: var(--danger-color); text-align: center">Error loading profile</p>';
         }
       };
 
@@ -201,6 +227,12 @@
             if (data.success) {
               showAlert("Profile updated successfully!", "success");
               loadProfile();
+
+              // Update local storage
+              const user = JSON.parse(localStorage.getItem("user"));
+              user.name = formData.name;
+              user.email = formData.email;
+              localStorage.setItem("user", JSON.stringify(user));
             } else {
               showAlert(data.message || "Update failed");
             }
@@ -261,7 +293,9 @@
         if (!password) return;
 
         if (
-          !confirm("Are you absolutely sure? This action cannot be undone.")
+          !confirm(
+            "⚠️ Are you absolutely sure? This action cannot be undone. All your data will be permanently deleted."
+          )
         ) {
           return;
         }

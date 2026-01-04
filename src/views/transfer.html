@@ -10,12 +10,12 @@
     <!-- Navbar -->
     <nav class="navbar">
       <div class="navbar-container">
-        <a href="/dashboard" class="navbar-brand">🏦 BankApp</a>
+        <a href="/dashboard.html" class="navbar-brand">🏦 BankApp</a>
         <ul class="navbar-menu">
-          <li><a href="/dashboard">Dashboard</a></li>
-          <li><a href="/transfer">Transfer</a></li>
-          <li><a href="/transactions">Transactions</a></li>
-          <li><a href="/profile">Profile</a></li>
+          <li><a href="/dashboard.html">Dashboard</a></li>
+          <li><a href="/transfer.html">Transfer</a></li>
+          <li><a href="/transactions.html">Transactions</a></li>
+          <li><a href="/profile.html">Profile</a></li>
         </ul>
         <div class="navbar-actions">
           <button class="btn btn-danger btn-sm" onclick="logout()">
@@ -26,27 +26,61 @@
     </nav>
 
     <div class="container">
-      <h2 style="margin: 2rem 0">Transfer Money</h2>
+      <h2
+        style="
+          margin: 2rem 0;
+          font-size: 2rem;
+          font-weight: 700;
+          text-align: center;
+        "
+      >
+        Transfer Money
+      </h2>
+      <p
+        style="
+          text-align: center;
+          color: var(--text-light);
+          margin-bottom: 3rem;
+          font-size: 1.05rem;
+        "
+      >
+        Send money instantly to any account
+      </p>
 
       <!-- Transfer Form -->
-      <div class="card" style="max-width: 600px; margin: 0 auto">
-        <div class="card-header">Send Money</div>
+      <div
+        class="card"
+        style="
+          max-width: 600px;
+          margin: 0 auto;
+          box-shadow: 0 10px 30px rgba(151, 20, 77, 0.15);
+        "
+      >
+        <div class="card-header" style="text-align: center">💸 Send Money</div>
         <div id="alertContainer"></div>
 
         <form id="transferForm">
           <div class="form-group">
-            <label for="to_account_number">Recipient Account Number</label>
+            <label for="to_account_number">
+              <span style="display: flex; align-items: center; gap: 0.5rem">
+                Recipient Account Number
+              </span>
+            </label>
             <input
               type="text"
               id="to_account_number"
               class="form-control"
-              placeholder="Enter account number"
+              placeholder="Enter recipient's account number"
               required
             />
           </div>
 
           <div class="form-group">
-            <label for="amount">Amount</label>
+            <label for="amount">
+              <span style="display: flex; align-items: center; gap: 0.5rem">
+                Transfer Amount
+              </span>
+            </label>
             <input
               type="number"
               id="amount"
@@ -55,18 +89,83 @@
               step="0.01"
               min="0.01"
               required
+              style="font-size: 1.25rem; font-weight: 600"
             />
+            <small
+              style="
+                color: var(--text-light);
+                margin-top: 0.5rem;
+                display: block;
+              "
+            >
+              Enter the amount you want to transfer
+            </small>
+          </div>
+
+          <div
+            style="
+              background: var(--bg-light);
+              padding: 1.5rem;
+              border-radius: 12px;
+              margin-bottom: 1.5rem;
+            "
+          >
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 0.5rem;
+              "
+            >
+              <span style="color: var(--text-light)">Transaction Fee:</span>
+              <span style="font-weight: 600">$0.00</span>
+            </div>
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                padding-top: 0.75rem;
+                border-top: 2px solid var(--border-color);
+              "
+            >
+              <span style="font-weight: 600; font-size: 1.05rem"
+                >Total Amount:</span
+              >
+              <span
+                id="totalAmount"
+                style="
+                  font-weight: 700;
+                  font-size: 1.25rem;
+                  color: var(--primary);
+                "
+                >$0.00</span
+              >
+            </div>
           </div>
 
           <button
             type="submit"
             class="btn btn-primary"
-            style="width: 100%"
+            style="width: 100%; padding: 1rem 2rem; font-size: 1.05rem"
             id="transferBtn"
           >
             Transfer Money
           </button>
         </form>
+
+        <div
+          style="
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--bg-light);
+            text-align: center;
+          "
+        >
+          <p style="color: var(--text-light); font-size: 0.95rem">
+            <strong>Note:</strong> Transfers are instant and secure. Make sure
+            to verify the recipient's account number before proceeding.
+          </p>
+        </div>
       </div>
     </div>
 
@@ -95,11 +194,21 @@
           ${message}
         </div>
       `;
-        window.scrollTo(0, 0);
+        window.scrollTo({ top: 0, behavior: "smooth" });
         setTimeout(() => {
           alertContainer.innerHTML = "";
         }, 5000);
       };
+
+      // Update total amount display
+      document.getElementById("amount").addEventListener("input", (e) => {
+        const amount = parseFloat(e.target.value) || 0;
+        const totalAmount = document.getElementById("totalAmount");
+        totalAmount.textContent = new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+        }).format(amount);
+      });
 
       document
         .getElementById("transferForm")
@@ -108,12 +217,25 @@
           const token = checkAuth();
 
           const transferBtn = document.getElementById("transferBtn");
+          const amount = parseFloat(document.getElementById("amount").value);
+          const toAccount = document.getElementById("to_account_number").value;
+
+          if (amount <= 0) {
+            showAlert("Please enter a valid amount");
+            return;
+          }
+
+          if (!toAccount.trim()) {
+            showAlert("Please enter a recipient account number");
+            return;
+          }
+
           transferBtn.disabled = true;
-          transferBtn.textContent = "Processing...";
+          transferBtn.textContent = "Processing Transfer...";
 
           const formData = {
-            toAccount: document.getElementById("to_account_number").value,
-            amount: parseFloat(document.getElementById("amount").value),
+            toAccount: toAccount,
+            amount: amount,
           };
 
           try {
@@ -128,8 +250,16 @@
             const data = await response.json();
 
             if (data.success || data.message === "Transfer successful") {
-              showAlert("Transfer successful!", "success");
+              showAlert(
+                `Transfer of ${new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                }).format(amount)} completed successfully!`,
+                "success"
+              );
               document.getElementById("transferForm").reset();
+              document.getElementById("totalAmount").textContent = "$0.00";
+
               setTimeout(() => {
                 window.location.href = "/dashboard.html";
               }, 2000);
@@ -139,7 +269,7 @@
               transferBtn.textContent = "Transfer Money";
             }
           } catch (error) {
-            showAlert("An error occurred");
+            showAlert("An error occurred. Please try again.");
             transferBtn.disabled = false;
             transferBtn.textContent = "Transfer Money";
           }

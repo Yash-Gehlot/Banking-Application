@@ -12,9 +12,9 @@
       <div class="navbar-container">
         <a href="/dashboard.html" class="navbar-brand">🏦 BankApp</a>
         <ul class="navbar-menu">
+          <li><a href="/dashboard.html">Dashboard</a></li>
           <li><a href="/transfer.html">Transfer</a></li>
           <li><a href="/transactions.html">Transactions</a></li>
-
           <li><a href="/profile.html">Profile</a></li>
         </ul>
         <div class="navbar-actions">
@@ -26,23 +26,25 @@
     </nav>
 
     <div class="container">
-      <h2 style="margin: 2rem 0 1rem 0">Welcome <span id="userName"></span></h2>
+      <h2 style="margin: 2rem 0 1rem 0; font-size: 2rem; font-weight: 700">
+        Welcome, <span id="userName" style="color: var(--primary)"></span>
+      </h2>
 
       <!-- Balance Card -->
       <div class="balance-card">
         <div class="balance-label">Your Balance</div>
         <div class="balance-amount" id="balance">$0.00</div>
         <div class="account-type" id="accountType">Savings Account</div>
-        <div style="margin-top: 1rem">
-          <small style="opacity: 0.8"
-            >Account: <span id="accountNumber"></span
-          ></small>
+        <div style="margin-top: 1rem; position: relative; z-index: 1">
+          <small style="opacity: 0.9; font-size: 0.95rem">
+            Account: <span id="accountNumber" style="font-weight: 600"></span>
+          </small>
         </div>
       </div>
 
       <!-- Quick Actions -->
       <div class="card">
-        <div class="card-header">Quick Actions</div>
+        <div class="card-header">Services</div>
         <div class="quick-actions">
           <button onclick="showDepositModal()" class="quick-action-btn">
             <div class="quick-action-icon">💰</div>
@@ -76,14 +78,15 @@
       <!-- Account Actions -->
       <div class="card" id="convertCard" style="display: none">
         <div class="card-header">Upgrade Your Account</div>
-        <p>
+        <p style="color: var(--text-light); margin-bottom: 1.5rem">
           Convert your savings account to a current account for unlimited
           transactions and additional benefits.
         </p>
-        <button class="btn btn-secondary mt-2" onclick="convertToCurrent()">
+        <button class="btn btn-secondary" onclick="convertToCurrent()">
           Convert to Current Account
         </button>
       </div>
+
       <!-- Deposit Modal -->
       <div
         id="depositModal"
@@ -94,37 +97,53 @@
           left: 0;
           width: 100%;
           height: 100%;
-          background: rgba(0, 0, 0, 0.5);
+          background: rgba(0, 0, 0, 0.6);
           z-index: 1000;
+          backdrop-filter: blur(4px);
         "
       >
         <div
           style="
             background: white;
             margin: 100px auto;
-            padding: 30px;
-            max-width: 400px;
-            border-radius: 8px;
+            padding: 2.5rem;
+            max-width: 450px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
           "
         >
-          <h3>Deposit Money</h3>
+          <h3
+            style="
+              margin-bottom: 1.5rem;
+              color: var(--text-dark);
+              font-size: 1.75rem;
+            "
+          >
+            Deposit Money
+          </h3>
           <input
             type="number"
             id="depositAmount"
             placeholder="Enter amount"
             class="form-control"
-            style="margin: 15px 0"
+            style="margin-bottom: 1.5rem"
           />
-          <button onclick="handleDeposit()" class="btn btn-primary">
-            Deposit
-          </button>
-          <button
-            onclick="closeModals()"
-            class="btn btn-secondary"
-            style="margin-left: 10px"
-          >
-            Cancel
-          </button>
+          <div style="display: flex; gap: 1rem">
+            <button
+              onclick="handleDeposit()"
+              class="btn btn-primary"
+              style="flex: 1"
+            >
+              Deposit
+            </button>
+            <button
+              onclick="closeModals()"
+              class="btn btn-outline"
+              style="flex: 1"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
 
@@ -138,44 +157,60 @@
           left: 0;
           width: 100%;
           height: 100%;
-          background: rgba(0, 0, 0, 0.5);
+          background: rgba(0, 0, 0, 0.6);
           z-index: 1000;
+          backdrop-filter: blur(4px);
         "
       >
         <div
           style="
             background: white;
             margin: 100px auto;
-            padding: 30px;
-            max-width: 400px;
-            border-radius: 8px;
+            padding: 2.5rem;
+            max-width: 450px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
           "
         >
-          <h3>Withdraw Money</h3>
+          <h3
+            style="
+              margin-bottom: 1.5rem;
+              color: var(--text-dark);
+              font-size: 1.75rem;
+            "
+          >
+            Withdraw Money
+          </h3>
           <input
             type="number"
             id="withdrawAmount"
             placeholder="Enter amount"
             class="form-control"
-            style="margin: 15px 0"
+            style="margin-bottom: 1rem"
           />
           <input
             type="password"
             id="withdrawPassword"
             placeholder="Enter password"
             class="form-control"
-            style="margin: 15px 0"
+            style="margin-bottom: 1.5rem"
           />
-          <button onclick="handleWithdraw()" class="btn btn-primary">
-            Withdraw
-          </button>
-          <button
-            onclick="closeModals()"
-            class="btn btn-secondary"
-            style="margin-left: 10px"
-          >
-            Cancel
-          </button>
+          <div style="display: flex; gap: 1rem">
+            <button
+              onclick="handleWithdraw()"
+              class="btn btn-primary"
+              style="flex: 1"
+            >
+              Withdraw
+            </button>
+            <button
+              onclick="closeModals()"
+              class="btn btn-outline"
+              style="flex: 1"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -195,7 +230,7 @@
       const logout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-        window.location.href = "/login.html";
+        window.location.href = "/index.html";
       };
 
       const formatCurrency = (amount) => {
@@ -270,49 +305,48 @@
             transactionsData.data.transactions.length > 0
           ) {
             transactionsContainer.innerHTML = `
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Type</th>
-                  <th>Description</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                 ${transactionsData.data.transactions
-                   .map(
-                     (t) => `
-  <tr>
-    <td>${t.id}</td>
-    <td><span class="badge ${
-      t.type === "credit" || t.type === "deposit"
-        ? "badge-success"
-        : "badge-danger"
-    }">${t.type}</span></td>
-    <td>${
-      t.type === "withdrawal"
-        ? "ATM Withdrawal"
-        : t.type === "deposit"
-        ? "Cash Deposit"
-        : "Transfer"
-    }</td>
-    <td>${formatCurrency(t.amount)}</td>
-    <td><span class="badge badge-success">completed</span></td>
-  </tr>
-`
-                   )
-                   .join("")}
-              </tbody>
-            </table>
-            <div class="text-center mt-2">
-              <a href="/transactions" class="btn btn-outline btn-sm">View All Transactions</a>
-            </div>
-          `;
+  <table class="table">
+    <thead>
+      <tr>
+        <th>S.No</th>
+        <th>Type</th>
+        <th>Party</th>
+        <th>Amount</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody>
+       ${transactionsData.data.transactions
+         .slice(0, 5)
+         .map((t, index) => {
+           const isNegative =
+             t.type === "debit" || t.type === "sent" || t.type === "withdrawal";
+           return `
+        <tr>
+          <td>${index + 1}</td>
+          <td><span class="badge ${
+            isNegative ? "badge-danger" : "badge-success"
+          }">${t.type}</span></td>
+          <td>${t.otherPartyName || "Self"}</td>
+          <td style="color: ${
+            isNegative ? "var(--danger-color)" : "var(--success-color)"
+          }; font-weight: 600">
+            ${isNegative ? "-" : "+"}${formatCurrency(t.amount)}
+          </td>
+          <td>${formatDate(t.createdAt)}</td>
+        </tr>
+      `;
+         })
+         .join("")}
+    </tbody>
+  </table>
+  <div class="text-center mt-2">
+    <a href="/transactions.html" class="btn btn-outline btn-sm">View All Transactions</a>
+  </div>
+`;
           } else {
             transactionsContainer.innerHTML =
-              '<p class="text-center" style="color: var(--text-light);">No transactions yet</p>';
+              '<p class="text-center" style="color: var(--text-light); padding: 2rem">No transactions yet</p>';
           }
         } catch (error) {
           console.error("Error loading dashboard:", error);
@@ -351,6 +385,7 @@
           alert("An error occurred");
         }
       };
+
       const showDepositModal = () => {
         document.getElementById("depositModal").style.display = "block";
       };
@@ -434,6 +469,7 @@
           alert("An error occurred");
         }
       };
+
       window.onload = loadDashboard;
     </script>
   </body>

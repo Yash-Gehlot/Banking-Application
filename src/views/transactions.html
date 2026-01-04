@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transactions - Banking System</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="navbar-container">
+        <a href="/dashboard.html" class="navbar-brand">🏦 BankApp</a>
+        <ul class="navbar-menu">
+          <li><a href="/dashboard.html">Dashboard</a></li>
+          <li><a href="/transfer.html">Transfer</a></li>
+          <li><a href="/transactions.html">Transactions</a></li>
+          <li><a href="/profile.html">Profile</a></li>
+        </ul>
+        <div class="navbar-actions">
+          <button class="btn btn-danger btn-sm" onclick="logout()">
+            Logout
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+      <h2 style="margin: 2rem 0; font-size: 2rem; font-weight: 700">
+        Transaction History
+      </h2>
+
+      <!-- Filters -->
+      <div class="card">
+        <div class="card-header">Filters & Options</div>
+        <div
+          style="display: flex; gap: 1rem; align-items: end; flex-wrap: wrap"
+        >
+          <div class="form-group" style="margin: 0; flex: 1; min-width: 200px">
+            <label for="itemsPerPage">Show per page</label>
+            <select
+              id="itemsPerPage"
+              class="form-control"
+              onchange="changeItemsPerPage()"
+            >
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin: 0; flex: 1; min-width: 200px">
+            <label for="typeFilter">Transaction Type</label>
+            <select
+              id="typeFilter"
+              class="form-control"
+              onchange="loadTransactions()"
+            >
+              <option value="">All Types</option>
+              <option value="sent">Sent</option>
+              <option value="received">Received</option>
+              <option value="deposit">Deposit</option>
+              <option value="withdrawal">Withdrawal</option>
+            </select>
+          </div>
+
+          <button class="btn btn-secondary" onclick="resetFilters()">
+            Reset Filters
+          </button>
+        </div>
+      </div>
+
+      <!-- Transactions Table -->
+      <div class="card">
+        <div class="card-header">All Transactions</div>
+        <div id="transactionsContainer">
+          <div class="loading">
+            <div class="spinner"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div
+        id="paginationContainer"
+        style="text-align: center; margin-bottom: 2rem"
+      ></div>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:3005";
+      let currentPage = 1;
+      let itemsPerPage = 10;
+      let totalPages = 1;
+
+      const checkAuth = () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          window.location.href = "/login.html";
+          return null;
+        }
+        return token;
+      };
+
+      const logout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/login.html";
+      };
+
+      const formatCurrency = (amount) => {
+        return new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+        }).format(amount);
+      };
+
+      const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      };
+
+      const changeItemsPerPage = () => {
+        itemsPerPage = parseInt(document.getElementById("itemsPerPage").value);
+        currentPage = 1;
+        loadTransactions();
+      };
+
+      const resetFilters = () => {
+        document.getElementById("itemsPerPage").value = "10";
+        document.getElementById("typeFilter").value = "";
+        itemsPerPage = 10;
+        currentPage = 1;
+        loadTransactions();
+      };
+
+      const loadTransactions = async () => {
+        const token = checkAuth();
+        if (!token) return;
+
+        const typeFilter = document.getElementById("typeFilter").value;
+
+        try {
+          const response = await fetch(
+            `${API_URL}/transactions/history?page=${currentPage}&limit=${itemsPerPage}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          const data = await response.json();
+
+          const container = document.getElementById("transactionsContainer");
+
+          if (data.success && data.data.transactions.length > 0) {
+            let transactions = data.data.transactions;
+
+            // Apply type filter
+            if (typeFilter) {
+              transactions = transactions.filter((t) => t.type === typeFilter);
+            }
+
+            const startSerial = (currentPage - 1) * itemsPerPage + 1;
+
+            container.innerHTML = `
+              <div style="overflow-x: auto">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>S.No</th>
+                      <th>Date & Time</th>
+                      <th>Type</th>
+                      <th>Party Name</th>
+                      <th>Account No.</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${transactions
+                      .map((t, index) => {
+                        const isNegative =
+                          t.type === "debit" ||
+                          t.type === "sent" ||
+                          t.type === "withdrawal";
+                        const serial = startSerial + index;
+
+                        return `
+                        <tr>
+                          <td><strong>${serial}</strong></td>
+                          <td>${formatDate(t.createdAt)}</td>
+                          <td><span class="badge ${
+                            isNegative ? "badge-danger" : "badge-success"
+                          }">${t.type}</span></td>
+                          <td>${t.otherPartyName}</td>
+                          <td>${t.otherPartyAccount || "-"}</td>
+                          <td style="color: ${
+                            isNegative
+                              ? "var(--danger-color)"
+                              : "var(--success-color)"
+                          }; font-weight: 700; font-size: 1.05rem">
+                            ${isNegative ? "-" : "+"}${formatCurrency(t.amount)}
+                          </td>
+                        </tr>
+                      `;
+                      })
+                      .join("")}
+                  </tbody>
+                </table>
+              </div>
+            `;
+
+            // Update pagination
+            totalPages = data.data.pagination.totalPages;
+            renderPagination(data.data.pagination);
+          } else {
+            container.innerHTML =
+              '<p class="text-center" style="color: var(--text-light); padding: 3rem;">No transactions found</p>';
+            document.getElementById("paginationContainer").innerHTML = "";
+          }
+        } catch (error) {
+          console.error("Error loading transactions:", error);
+          container.innerHTML =
+            '<p class="text-center" style="color: var(--danger-color); padding: 3rem;">Error loading transactions</p>';
+        }
+      };
+
+      const renderPagination = (pagination) => {
+        const container = document.getElementById("paginationContainer");
+
+        let paginationHTML =
+          '<div style="display: flex; gap: 0.5rem; justify-content: center; align-items: center; margin-top: 1.5rem; flex-wrap: wrap">';
+
+        // Previous button
+        paginationHTML += `
+          <button 
+            class="btn btn-outline btn-sm" 
+            onclick="goToPage(${currentPage - 1})" 
+            ${currentPage === 1 ? "disabled" : ""}
+          >
+            ← Previous
+          </button>
+        `;
+
+        // Page numbers
+        const maxButtons = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+        let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+
+        if (endPage - startPage < maxButtons - 1) {
+          startPage = Math.max(1, endPage - maxButtons + 1);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+          paginationHTML += `
+            <button 
+              class="btn btn-sm ${
+                i === currentPage ? "btn-primary" : "btn-outline"
+              }" 
+              onclick="goToPage(${i})"
+            >
+              ${i}
+            </button>
+          `;
+        }
+
+        // Next button
+        paginationHTML += `
+          <button 
+            class="btn btn-outline btn-sm" 
+            onclick="goToPage(${currentPage + 1})" 
+            ${currentPage === totalPages ? "disabled" : ""}
+          >
+            Next →
+          </button>
+        `;
+
+        paginationHTML += "</div>";
+        paginationHTML += `<p style="margin-top: 1rem; color: var(--text-light); font-size: 0.95rem">Showing page ${currentPage} of ${totalPages} (Total: ${pagination.total} transactions)</p>`;
+
+        container.innerHTML = paginationHTML;
+      };
+
+      const goToPage = (page) => {
+        if (page < 1 || page > totalPages) return;
+        currentPage = page;
+        loadTransactions();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+
+      window.onload = loadTransactions;
+    </script>
+  </body>
+</html>
