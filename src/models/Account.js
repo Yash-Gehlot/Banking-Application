@@ -5,6 +5,7 @@ const Account = sequelize.define(
   "Account",
   {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    userId: { type: DataTypes.INTEGER, allowNull: false },
     accountNumber: { type: DataTypes.INTEGER, unique: true },
     balance: DataTypes.DECIMAL(10, 2),
   },
