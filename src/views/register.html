@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register - Banking System</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="auth-container">
+      <div class="auth-card" style="max-width: 600px">
+        <div class="auth-header">
+          <h1>🏦 Create Account</h1>
+          <p style="color: var(--text-light)">Start your banking journey</p>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <form id="registerForm">
+          <div class="grid grid-2">
+            <div class="form-group">
+              <label for="full_name">Full Name</label>
+              <input
+                type="text"
+                id="full_name"
+                class="form-control"
+                placeholder="John Doe"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                class="form-control"
+                placeholder="john@example.com"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="grid grid-2">
+            <div class="form-group">
+              <label for="phone">Phone</label>
+              <input
+                type="tel"
+                id="phone"
+                class="form-control"
+                placeholder="1234567890"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="date_of_birth">Date of Birth</label>
+              <input
+                type="date"
+                id="date_of_birth"
+                class="form-control"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="address">Address</label>
+            <textarea
+              id="address"
+              class="form-control"
+              rows="2"
+              placeholder="Enter your complete address"
+              required
+            ></textarea>
+          </div>
+
+          <div class="grid grid-2">
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input
+                type="password"
+                id="password"
+                class="form-control"
+                placeholder="Minimum 8 characters"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="confirm_password">Confirm Password</label>
+              <input
+                type="password"
+                id="confirm_password"
+                class="form-control"
+                placeholder="Re-enter password"
+                required
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+            style="width: 100%"
+            id="registerBtn"
+          >
+            Create Account
+          </button>
+        </form>
+
+        <div class="auth-footer">
+          Already have an account? <a href="/login.html">Login here</a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:3005";
+
+      const showAlert = (message, type = "error") => {
+        const alertContainer = document.getElementById("alertContainer");
+        alertContainer.innerHTML = `
+        <div class="alert alert-${type}">
+          ${message}
+        </div>
+      `;
+        setTimeout(() => {
+          alertContainer.innerHTML = "";
+        }, 5000);
+      };
+
+      document
+        .getElementById("registerForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const registerBtn = document.getElementById("registerBtn");
+          const password = document.getElementById("password").value;
+          const confirm_password =
+            document.getElementById("confirm_password").value;
+
+          if (password !== confirm_password) {
+            showAlert("Passwords do not match");
+            return;
+          }
+
+          registerBtn.disabled = true;
+          registerBtn.textContent = "Creating Account...";
+
+          const formData = {
+            email: document.getElementById("email").value,
+            password: password,
+            phone: document.getElementById("phone").value,
+            full_name: document.getElementById("full_name").value,
+            date_of_birth: document.getElementById("date_of_birth").value,
+            address: document.getElementById("address").value,
+          };
+
+          try {
+            const response = await fetch(`${API_URL}/auth/register`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(formData),
+            });
+
+            const data = await response.json();
+
+            if (data.success || data.message === "Account created") {
+              showAlert(
+                "Account created successfully! Redirecting...",
+                "success"
+              );
+              setTimeout(() => {
+                window.location.href = "/login.html";
+              }, 1000);
+            } else {
+              showAlert(
+                data.message || data.errors?.join(", ") || "Registration failed"
+              );
+              registerBtn.disabled = false;
+              registerBtn.textContent = "Create Account";
+            }
+          } catch (error) {
+            showAlert("An error occurred. Please try again.");
+            registerBtn.disabled = false;
+            registerBtn.textContent = "Create Account";
+          }
+        });
+    </script>
+  </body>
+</html>
