@@ -5,7 +5,6 @@ import Transaction from "./Transaction.js";
 User.hasOne(Account, { foreignKey: "userId" });
 Account.belongsTo(User, { foreignKey: "userId" });
 
-// Add these new relationships
 Account.hasMany(Transaction, {
   foreignKey: "fromAccount",
   sourceKey: "accountNumber",

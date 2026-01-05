@@ -66,7 +66,7 @@ export const transferMoney = asyncHandler(async (req, res) => {
     await sender.save({ transaction: t });
     await receiver.save({ transaction: t });
 
-    // Create sender's debit transaction
+    // Creating sender's debit transaction entry
     await Transaction.create(
       {
         fromAccount: sender.accountNumber,
@@ -77,7 +77,7 @@ export const transferMoney = asyncHandler(async (req, res) => {
       { transaction: t }
     );
 
-    // Create receiver's credit transaction
+    // Creating receiver's credit transaction entry
     await Transaction.create(
       {
         fromAccount: sender.accountNumber,
@@ -120,10 +120,6 @@ export const history = asyncHandler(async (req, res) => {
 
   const offset = (page - 1) * limit;
 
-  // Get transactions where:
-  // - User sent money (fromAccount matches AND type is debit)
-  // - User received money (toAccount matches AND type is credit)
-  // - User deposited/withdrew (fromAccount = toAccount)
   const { count, rows: txns } = await Transaction.findAndCountAll({
     where: {
       [Op.or]: [
@@ -142,7 +138,6 @@ export const history = asyncHandler(async (req, res) => {
     offset: parseInt(offset),
   });
 
-  // Get sender and receiver details for each transaction
   const enrichedTxns = await Promise.all(
     txns.map(async (txn) => {
       let otherPartyName = "Unknown";
@@ -154,7 +149,6 @@ export const history = asyncHandler(async (req, res) => {
         otherPartyName = "Self";
         otherPartyAccount = account.accountNumber;
       } else if (txn.type === "debit") {
-        // User sent money
         displayType = "sent";
         const receiverAccount = await Account.findOne({
           where: { accountNumber: txn.toAccount },
@@ -163,7 +157,6 @@ export const history = asyncHandler(async (req, res) => {
         otherPartyName = receiverAccount?.User?.name || "Unknown";
         otherPartyAccount = txn.toAccount;
       } else if (txn.type === "credit") {
-        // User received money
         displayType = "received";
         const senderAccount = await Account.findOne({
           where: { accountNumber: txn.fromAccount },

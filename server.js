@@ -8,7 +8,6 @@ import userRoutes from "./src/routes/userRoutes.js";
 import errorMiddleware from "./src/middlewares/errorMiddleware.js";
 import path from "path";
 import { fileURLToPath } from "url";
-import cors from "cors";
 
 dotenv.config();
 
@@ -18,7 +17,6 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.use(express.json());
 
-/* static files */
 app.use(express.static(path.join(__dirname, "src", "public")));
 app.use(express.static(path.join(__dirname, "src", "views")));
 
@@ -26,13 +24,11 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "src", "views", "index.html"));
 });
 
-/* routes */
 app.use("/auth", authRoutes);
 app.use("/account", accountRoutes);
 app.use("/transactions", transactionRoutes);
 app.use("/user", userRoutes);
 
-/* error handler */
 app.use(errorMiddleware);
 
 const PORT = 3005;
