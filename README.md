@@ -81,7 +81,45 @@ Password verification for withdrawals and account deletion
 Database transactions for consistency
 SQL injection prevention through ORM
 
+
+
 📁 Project Structure
+Path	Description
+server.js	Application entry point
+package.json	Project dependencies and scripts
+.env	Environment variables
+src/	Application source code
+src/config/	Configuration files
+src/config/database.js	Database configuration
+src/models/	Database models
+src/models/User.js	User model
+src/models/Account.js	Account model
+src/models/Transaction.js	Transaction model
+src/models/index.js	Model relationships
+src/controllers/	Business logic
+src/controllers/authController.js	User registration & login
+src/controllers/accountController.js	Balance, deposit, withdrawal
+src/controllers/transactionController.js	Transfers & transaction history
+src/controllers/userController.js	User profile management
+src/routes/	API route definitions
+src/routes/authRoutes.js	Authentication routes
+src/routes/accountRoutes.js	Account-related routes
+src/routes/transactionRoutes.js	Transaction routes
+src/routes/userRoutes.js	User profile routes
+src/middlewares/	Custom middlewares
+src/middlewares/authMiddleware.js	JWT authentication middleware
+src/middlewares/errorMiddleware.js	Global error handler
+src/utils/	Utility functions
+src/utils/asyncHandler.js	Async error handling utility
+src/utils/generateAccountNo.js	Account number generator
+src/views/	Frontend views (ATM/Web UI)
+src/views/index.html	Landing page
+src/views/dashboard.html	Main dashboard
+src/views/transfer.html	Money transfer page
+src/views/transactions.html	Transaction history page
+src/views/profile.html	User profile page
+README.md	Project documentation
+
 banking-system/
 ├── server.js                 # Application entry point
 ├── package.json              # Dependencies and scripts
